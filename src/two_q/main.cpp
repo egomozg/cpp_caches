@@ -1,5 +1,4 @@
-// CACHE_HEADER is selected by the CMake executable target.
-#include CACHE_HEADER
+#include "2q.hpp"
 
 #include <cassert>
 #include <iostream>
@@ -12,7 +11,7 @@ int main() {
 	std::size_t m, n;
 	int hits {0};
 	std::cin >> m >> n;
-	cache_t<int> c{m};
+	caches::two_q::cache_t<int> c{m};
 	for (std::size_t i = 0; i < n; ++i) {
 		int p;
 		std::cin >> p;

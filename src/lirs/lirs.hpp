@@ -6,6 +6,8 @@
 #include <list>
 #include <unordered_map>
 
+namespace caches::lirs {
+
 template <typename T, typename KeyT = int>
 class cache_t {
 	std::size_t sz_;
@@ -122,3 +124,5 @@ public:
 		return hit;
 	}
 };
+
+} // namespace caches::lirs

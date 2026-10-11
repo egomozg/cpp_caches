@@ -8,7 +8,7 @@ int load_page(int key) { return key; }
 }
 
 TEST_CASE("LRU: A hit does not load the page again", "[lru]") {
-  cache_t<int> cache(2);
+  caches::lru::cache_t<int> cache(2);
   int loads = 0;
   auto load = [&loads](int key) {
     ++loads;
@@ -25,7 +25,7 @@ TEST_CASE("LRU: A hit does not load the page again", "[lru]") {
 }
 
 TEST_CASE("LRU: A hit protects the page from the next eviction", "[lru]") {
-  cache_t<int> cache(2);
+  caches::lru::cache_t<int> cache(2);
   REQUIRE_FALSE(cache.lookup_update(1, load_page));
   REQUIRE_FALSE(cache.lookup_update(2, load_page));
   REQUIRE(cache.lookup_update(1, load_page));
@@ -37,7 +37,7 @@ TEST_CASE("LRU: A hit protects the page from the next eviction", "[lru]") {
 }
 
 TEST_CASE("LRU: A cache of capacity one replaces its only page", "[lru]") {
-  cache_t<int> cache(1);
+  caches::lru::cache_t<int> cache(1);
   REQUIRE_FALSE(cache.lookup_update(1, load_page));
   REQUIRE(cache.full());
   REQUIRE(cache.lookup_update(1, load_page));
@@ -48,7 +48,7 @@ TEST_CASE("LRU: A cache of capacity one replaces its only page", "[lru]") {
 }
 
 TEST_CASE("LRU: Zero capacity never caches or calls the loader", "[lru]") {
-  cache_t<int> cache(0);
+  caches::lru::cache_t<int> cache(0);
   int loads = 0;
   auto load = [&loads](int key) {
     ++loads;
@@ -61,7 +61,7 @@ TEST_CASE("LRU: Zero capacity never caches or calls the loader", "[lru]") {
 }
 #if 0 // TODO: I'm waiting for next lectures to fix those tests
 TEST_CASE("LRU: Keys and stored values can have different types", "[lru]") {
-  cache_t<std::string> cache(1);
+  caches::lru::cache_t<std::string> cache(1);
   auto load = [](int key) { return "page " + std::to_string(key); };
   REQUIRE_FALSE(cache.lookup_update(5, load));
   REQUIRE(cache.cache_.front().second == "page 5");
@@ -71,7 +71,7 @@ TEST_CASE("LRU: Keys and stored values can have different types", "[lru]") {
 }
 
 TEST_CASE("LRU: An integer value may not equal its key", "[lru]") {
-  cache_t<int> cache(1);
+  caches::lru::cache_t<int> cache(1);
   auto load = [](int key) { return key + 100; };
   REQUIRE_FALSE(cache.lookup_update(5, load));
   REQUIRE(cache.cache_.front().second == 105);

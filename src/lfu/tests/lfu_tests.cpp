@@ -8,7 +8,7 @@ int load_page(int key) { return key; }
 }
 
 TEST_CASE("LFU: Zero capacity never calls the loader", "[lfu]") {
-    cache_t<int> cache(0);
+    caches::lfu::cache_t<int> cache(0);
     int loads = 0;
     auto load = [&](int key) { ++loads; return key; };
     REQUIRE(cache.full());
@@ -18,7 +18,7 @@ TEST_CASE("LFU: Zero capacity never calls the loader", "[lfu]") {
 }
 
 TEST_CASE("LFU: One slot supports promotion and replacement", "[lfu]") {
-    cache_t<int> cache(1);
+    caches::lfu::cache_t<int> cache(1);
     int loads = 0;
     auto load = [&](int key) { ++loads; return key; };
     REQUIRE_FALSE(cache.full());
@@ -35,7 +35,7 @@ TEST_CASE("LFU: One slot supports promotion and replacement", "[lfu]") {
 }
 
 TEST_CASE("LFU: Frequency wins over recency", "[lfu]") {
-    cache_t<int> cache(2);
+    caches::lfu::cache_t<int> cache(2);
     REQUIRE_FALSE(cache.lookup_update(1, load_page));
     REQUIRE(cache.lookup_update(1, load_page));
     REQUIRE(cache.lookup_update(1, load_page));
@@ -47,7 +47,7 @@ TEST_CASE("LFU: Frequency wins over recency", "[lfu]") {
 }
 
 TEST_CASE("LFU: Equal frequencies evict the least recently used page", "[lfu]") {
-    cache_t<int> cache(2);
+    caches::lfu::cache_t<int> cache(2);
     REQUIRE_FALSE(cache.lookup_update(1, load_page));
     REQUIRE_FALSE(cache.lookup_update(2, load_page));
     REQUIRE(cache.lookup_update(2, load_page));

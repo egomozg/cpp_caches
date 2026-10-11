@@ -8,7 +8,7 @@ int load_page(int key) { return key; }
 
 // For capacity 4: A1in = [5], Am = [3, 2, 1], A1out = [4].
 // Lists in comments are ordered newest to oldest.
-void prepare_main_queue(cache_t<int>& cache) {
+void prepare_main_queue(caches::two_q::cache_t<int>& cache) {
   for (int key : {1, 2, 3, 4, 5}) {
     REQUIRE_FALSE(cache.lookup_update(key, load_page));
   }
@@ -19,7 +19,7 @@ void prepare_main_queue(cache_t<int>& cache) {
 }
 
 TEST_CASE("Full 2Q: zero capacity skips the loader", "[2q][full]") {
-  cache_t<int> cache(0);
+  caches::two_q::cache_t<int> cache(0);
   int loads = 0;
   auto load = [&loads](int key) { ++loads; return key; };
   REQUIRE(cache.full());
@@ -29,7 +29,7 @@ TEST_CASE("Full 2Q: zero capacity skips the loader", "[2q][full]") {
 }
 
 TEST_CASE("Full 2Q: free capacity is available to A1in above Kin", "[2q][full]") {
-  cache_t<int> cache(4); // Kin = 1.
+  caches::two_q::cache_t<int> cache(4); // Kin = 1.
   for (int key : {1, 2, 3, 4}) {
     REQUIRE_FALSE(cache.full());
     REQUIRE_FALSE(cache.lookup_update(key, load_page));
@@ -41,7 +41,7 @@ TEST_CASE("Full 2Q: free capacity is available to A1in above Kin", "[2q][full]")
 }
 
 TEST_CASE("Full 2Q: A1in hits neither promote nor refresh FIFO order", "[2q][full]") {
-  cache_t<int> cache(4);
+  caches::two_q::cache_t<int> cache(4);
   int loads = 0;
   auto load = [&loads](int key) { ++loads; return key; };
   for (int key : {1, 2, 3, 4}) {
@@ -58,7 +58,7 @@ TEST_CASE("Full 2Q: A1in hits neither promote nor refresh FIFO order", "[2q][ful
 }
 
 TEST_CASE("Full 2Q: ghost access reloads and promotes into Am", "[2q][full]") {
-  cache_t<int> cache(4);
+  caches::two_q::cache_t<int> cache(4);
   int loads = 0;
   auto load = [&loads](int key) { ++loads; return key; };
   for (int key : {1, 2, 3, 4, 5}) {
@@ -78,7 +78,7 @@ TEST_CASE("Full 2Q: ghost access reloads and promotes into Am", "[2q][full]") {
 }
 
 TEST_CASE("Full 2Q: above Kin evicts from A1in with Am occupied", "[2q][full]") {
-  cache_t<int> cache(4);
+  caches::two_q::cache_t<int> cache(4);
   for (int key : {1, 2, 3, 4, 5, 1, 2}) {
     REQUIRE_FALSE(cache.lookup_update(key, load_page));
   }
@@ -101,7 +101,7 @@ TEST_CASE("Full 2Q: above Kin evicts from A1in with Am occupied", "[2q][full]") 
 }
 
 TEST_CASE("Full 2Q: equality with Kin evicts from Am", "[2q][full]") {
-  cache_t<int> cache(4);
+  caches::two_q::cache_t<int> cache(4);
   prepare_main_queue(cache);
   SECTION("A new key reclaims from Am") {
     REQUIRE_FALSE(cache.lookup_update(6, load_page));
@@ -117,7 +117,7 @@ TEST_CASE("Full 2Q: equality with Kin evicts from Am", "[2q][full]") {
 }
 
 TEST_CASE("Full 2Q: Am hits refresh LRU order without reloading", "[2q][full]") {
-  cache_t<int> cache(4);
+  caches::two_q::cache_t<int> cache(4);
   prepare_main_queue(cache);
   int loads = 0;
   auto load = [&loads](int key) { ++loads; return key; };
@@ -134,7 +134,7 @@ TEST_CASE("Full 2Q: Am hits refresh LRU order without reloading", "[2q][full]") 
 }
 
 TEST_CASE("Full 2Q: Kout drops the oldest ghost but retains recent ones", "[2q][full]") {
-  cache_t<int> cache(4); // Kout = 2.
+  caches::two_q::cache_t<int> cache(4); // Kout = 2.
   for (int key : {1, 2, 3, 4, 5, 6, 7}) {
     REQUIRE_FALSE(cache.lookup_update(key, load_page));
   }
@@ -156,7 +156,7 @@ TEST_CASE("Full 2Q: Kout drops the oldest ghost but retains recent ones", "[2q][
 }
 
 TEST_CASE("Full 2Q: consuming a ghost frees a history slot", "[2q][full]") {
-  cache_t<int> cache(4);
+  caches::two_q::cache_t<int> cache(4);
   for (int key : {1, 2, 3, 4, 5, 6}) {
     REQUIRE_FALSE(cache.lookup_update(key, load_page));
   }
@@ -171,7 +171,7 @@ TEST_CASE("Full 2Q: consuming a ghost frees a history slot", "[2q][full]") {
 }
 
 TEST_CASE("Full 2Q: evicted Am pages do not enter ghost history", "[2q][full]") {
-  cache_t<int> cache(4);
+  caches::two_q::cache_t<int> cache(4);
   prepare_main_queue(cache);
   REQUIRE_FALSE(cache.lookup_update(6, load_page)); // Evicts 1 from Am.
   REQUIRE_FALSE(cache.lookup_update(1, load_page)); // Must enter A1in.
@@ -184,7 +184,7 @@ TEST_CASE("Full 2Q: evicted Am pages do not enter ghost history", "[2q][full]") 
 }
 
 TEST_CASE("Full 2Q: capacity one handles empty Am and empty A1in", "[2q][full]") {
-  cache_t<int> cache(1);
+  caches::two_q::cache_t<int> cache(1);
   REQUIRE_FALSE(cache.lookup_update(1, load_page));
   REQUIRE(cache.lookup_update(1, load_page)); // Still in A1in.
   REQUIRE_FALSE(cache.lookup_update(2, load_page)); // Am empty: evict A1in.
@@ -203,7 +203,7 @@ TEST_CASE("Full 2Q: capacity one handles empty Am and empty A1in", "[2q][full]")
 }
 
 TEST_CASE("Full 2Q: Kin scales with capacity", "[2q][full]") {
-  cache_t<int> cache(8); // Kin = 2.
+  caches::two_q::cache_t<int> cache(8); // Kin = 2.
   for (int key = 1; key <= 9; ++key) {
     REQUIRE_FALSE(cache.lookup_update(key, load_page));
   }
@@ -220,7 +220,7 @@ TEST_CASE("Full 2Q: Kin scales with capacity", "[2q][full]") {
 }
 
 TEST_CASE("Full 2Q: Kout scales with capacity", "[2q][full]") {
-  cache_t<int> cache(8); // Kout = 4.
+  caches::two_q::cache_t<int> cache(8); // Kout = 4.
   for (int key = 1; key <= 13; ++key) {
     REQUIRE_FALSE(cache.lookup_update(key, load_page));
   }
@@ -242,7 +242,7 @@ TEST_CASE("Full 2Q: Kout scales with capacity", "[2q][full]") {
 }
 
 TEST_CASE("Full 2Q: ghost keys are independent of loaded values", "[2q][full]") {
-  cache_t<int, std::string> cache(1);
+  caches::two_q::cache_t<int, std::string> cache(1);
   int loads = 0;
   auto load = [&loads](const std::string&) { ++loads; return 42; };
   REQUIRE_FALSE(cache.lookup_update("one", load));

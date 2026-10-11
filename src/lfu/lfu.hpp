@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <utility>
 
+namespace caches::lfu {
+
 template <typename T, typename KeyT = int>
 class cache_t {
 	std::size_t sz_;
@@ -88,3 +90,5 @@ public:
 		return false;
 	}
 };
+
+} // namespace caches::lfu

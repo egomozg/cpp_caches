@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <utility>
 
+namespace caches::simplified_two_q {
+
 template <typename T, typename KeyT = int> class cache_t {
   std::size_t sz_;
   std::size_t a1_threshold_;
@@ -58,3 +60,5 @@ public:
     return false;
   }
 };
+
+} // namespace caches::simplified_two_q

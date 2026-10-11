@@ -8,7 +8,7 @@ namespace {
 }
 
 TEST_CASE("ARC: Zero capacity never calls the loader", "[arc]") {
-    cache_t<int> cache(0);
+    caches::arc::cache_t<int> cache(0);
     int loads = 0;
     auto load = [&](int key) { ++loads; return key; };
     REQUIRE(cache.full());
@@ -18,7 +18,7 @@ TEST_CASE("ARC: Zero capacity never calls the loader", "[arc]") {
 }
 
 TEST_CASE("ARC: A full T1 discards its oldest page", "[arc]") {
-    cache_t<int> cache{2};
+    caches::arc::cache_t<int> cache{2};
     REQUIRE_FALSE(cache.lookup_update(1, load_page));
     REQUIRE_FALSE(cache.lookup_update(2, load_page));
     REQUIRE(cache.full());
@@ -28,7 +28,7 @@ TEST_CASE("ARC: A full T1 discards its oldest page", "[arc]") {
 }
 
 TEST_CASE("ARC: Hits in T1 and T2 do not call the loader", "[arc]") {
-    cache_t<int> cache(2);
+    caches::arc::cache_t<int> cache(2);
     int loads = 0;
     auto load = [&](int key) { ++loads; return key + 100; };
     REQUIRE_FALSE(cache.full());
@@ -43,7 +43,7 @@ TEST_CASE("ARC: Hits in T1 and T2 do not call the loader", "[arc]") {
 }
 
 TEST_CASE("ARC: One slot replaces pages from T1", "[arc]") {
-    cache_t<int> cache(1);
+    caches::arc::cache_t<int> cache(1);
     REQUIRE_FALSE(cache.lookup_update(1, load_page));
     REQUIRE(cache.full());
     REQUIRE_FALSE(cache.lookup_update(2, load_page));
@@ -54,7 +54,7 @@ TEST_CASE("ARC: One slot replaces pages from T1", "[arc]") {
 }
 
 TEST_CASE("ARC: A T1 hit protects the page during a scan", "[arc]") {
-    cache_t<int> cache(2);
+    caches::arc::cache_t<int> cache(2);
     REQUIRE_FALSE(cache.lookup_update(1, load_page));
     REQUIRE(cache.lookup_update(1, load_page));
     // New pages cycle through T1; page 1 stays in T2.
@@ -67,7 +67,7 @@ TEST_CASE("ARC: A T1 hit protects the page during a scan", "[arc]") {
 }
 
 TEST_CASE("ARC: A T2 hit changes the next eviction victim", "[arc]") {
-    cache_t<int> cache(2);
+    caches::arc::cache_t<int> cache(2);
     REQUIRE_FALSE(cache.lookup_update(1, load_page));
     REQUIRE(cache.lookup_update(1, load_page));
     REQUIRE_FALSE(cache.lookup_update(2, load_page));
@@ -79,7 +79,7 @@ TEST_CASE("ARC: A T2 hit changes the next eviction victim", "[arc]") {
 }
 
 TEST_CASE("ARC: A B1 return reloads the page and favors T1", "[arc]") {
-    cache_t<int> cache(2);
+    caches::arc::cache_t<int> cache(2);
     int loads = 0;
     auto load = [&](int key) { ++loads; return key + 100; };
     REQUIRE_FALSE(cache.lookup_update(1, load));
@@ -96,7 +96,7 @@ TEST_CASE("ARC: A B1 return reloads the page and favors T1", "[arc]") {
 }
 
 TEST_CASE("ARC: A B2 return reloads the page and favors T2", "[arc]") {
-    cache_t<int> cache(2);
+    caches::arc::cache_t<int> cache(2);
     int loads = 0;
     auto load = [&](int key) { ++loads; return key; };
     REQUIRE_FALSE(cache.lookup_update(1, load));
@@ -113,7 +113,7 @@ TEST_CASE("ARC: A B2 return reloads the page and favors T2", "[arc]") {
 }
 
 TEST_CASE("ARC: A B2 return works when T1 is empty", "[arc]") {
-    cache_t<int> cache(1);
+    caches::arc::cache_t<int> cache(1);
     REQUIRE_FALSE(cache.lookup_update(1, load_page));
     REQUIRE(cache.lookup_update(1, load_page));
     REQUIRE_FALSE(cache.lookup_update(2, load_page)); // B2: [1], T1: [2].
@@ -124,7 +124,7 @@ TEST_CASE("ARC: A B2 return works when T1 is empty", "[arc]") {
 }
 
 TEST_CASE("ARC: Full L1 forgets the oldest B1 key", "[arc]") {
-    cache_t<int> cache(2);
+    caches::arc::cache_t<int> cache(2);
     REQUIRE_FALSE(cache.lookup_update(1, load_page));
     REQUIRE(cache.lookup_update(1, load_page));
     REQUIRE_FALSE(cache.lookup_update(2, load_page));
@@ -137,7 +137,7 @@ TEST_CASE("ARC: Full L1 forgets the oldest B1 key", "[arc]") {
 }
 
 TEST_CASE("ARC: Full history forgets the oldest B2 key", "[arc]") {
-    cache_t<int> cache(2);
+    caches::arc::cache_t<int> cache(2);
     REQUIRE_FALSE(cache.lookup_update(1, load_page));
     REQUIRE(cache.lookup_update(1, load_page));
     REQUIRE_FALSE(cache.lookup_update(2, load_page));
@@ -154,7 +154,7 @@ TEST_CASE("ARC: Full history forgets the oldest B2 key", "[arc]") {
 }
 
 TEST_CASE("ARC: String keys are independent of integer values", "[arc]") {
-    cache_t<int, std::string> cache(2);
+    caches::arc::cache_t<int, std::string> cache(2);
     int loads = 0;
     auto load = [&](const std::string& key) { ++loads; return 100; };
     REQUIRE_FALSE(cache.lookup_update("one", load));

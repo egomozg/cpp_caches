@@ -2,9 +2,8 @@ add_library(two_q INTERFACE)
 target_include_directories(two_q INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(two_q INTERFACE cxx_std_20)
 
-add_executable(two_q_cli ${PROJECT_SOURCE_DIR}/main.cpp)
+add_executable(two_q_cli main.cpp)
 target_link_libraries(two_q_cli PRIVATE two_q)
-target_compile_definitions(two_q_cli PRIVATE CACHE_HEADER="2q.hpp")
 
 if(BUILD_TESTING)
   add_executable(two_q_tests "tests/two_q_tests.cpp")

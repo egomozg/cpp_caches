@@ -31,7 +31,7 @@ Page load_tracked_page(int key) { return Page(key); }
 } // namespace
 
 TEST_CASE("LIRS: Zero capacity never calls the loader", "[lirs]") {
-	cache_t<int> cache(0);
+	caches::lirs::cache_t<int> cache(0);
 	loads = 0;
 	REQUIRE(cache.full());
 	REQUIRE_FALSE(cache.lookup_update(1, load_page));
@@ -40,7 +40,7 @@ TEST_CASE("LIRS: Zero capacity never calls the loader", "[lirs]") {
 }
 
 TEST_CASE("LIRS: Warm-up fills the cache and hits do not reload", "[lirs]") {
-	cache_t<int> cache(3);
+	caches::lirs::cache_t<int> cache(3);
 	loads = 0;
 	REQUIRE_FALSE(cache.full());
 	REQUIRE_FALSE(cache.lookup_update(1, load_page));
@@ -54,7 +54,7 @@ TEST_CASE("LIRS: Warm-up fills the cache and hits do not reload", "[lirs]") {
 }
 
 TEST_CASE("LIRS: One slot replaces pages without a LIR part", "[lirs]") {
-	cache_t<int> cache(1);
+	caches::lirs::cache_t<int> cache(1);
 	loads = 0;
 	REQUIRE_FALSE(cache.lookup_update(1, load_page));
 	REQUIRE(cache.full());
@@ -66,7 +66,7 @@ TEST_CASE("LIRS: One slot replaces pages without a LIR part", "[lirs]") {
 }
 
 TEST_CASE("LIRS: A scan preserves LIR pages", "[lirs]") {
-	cache_t<int> cache(3);
+	caches::lirs::cache_t<int> cache(3);
 	REQUIRE_FALSE(cache.lookup_update(1, load_page));
 	REQUIRE_FALSE(cache.lookup_update(2, load_page));
 	for (int key = 3; key <= 100; ++key) {
@@ -79,7 +79,7 @@ TEST_CASE("LIRS: A scan preserves LIR pages", "[lirs]") {
 }
 
 TEST_CASE("LIRS: A resident HIR in S is promoted", "[lirs]") {
-	cache_t<int> cache(3);
+	caches::lirs::cache_t<int> cache(3);
 	for (int key = 1; key <= 3; ++key)
 		REQUIRE_FALSE(cache.lookup_update(key, load_page));
 	REQUIRE(cache.lookup_update(3, load_page));				// Promote 3, demote 1.
@@ -90,7 +90,7 @@ TEST_CASE("LIRS: A resident HIR in S is promoted", "[lirs]") {
 }
 
 TEST_CASE("LIRS: Returning history is a miss but promotes the page", "[lirs]") {
-	cache_t<int> cache(3);
+	caches::lirs::cache_t<int> cache(3);
 	loads = 0;
 	for (int key = 1; key <= 4; ++key)
 		REQUIRE_FALSE(cache.lookup_update(key, load_page));
@@ -104,7 +104,7 @@ TEST_CASE("LIRS: Returning history is a miss but promotes the page", "[lirs]") {
 }
 
 TEST_CASE("LIRS: Pruning S keeps resident HIR data", "[lirs]") {
-	cache_t<int> cache(3);
+	caches::lirs::cache_t<int> cache(3);
 	for (int key = 1; key <= 3; ++key)
 		REQUIRE_FALSE(cache.lookup_update(key, load_page));
 	REQUIRE(cache.lookup_update(1, load_page));
@@ -117,7 +117,7 @@ TEST_CASE("LIRS: Pruning S keeps resident HIR data", "[lirs]") {
 }
 
 TEST_CASE("LIRS: Pruned history does not cause promotion", "[lirs]") {
-	cache_t<int> cache(3);
+	caches::lirs::cache_t<int> cache(3);
 	for (int key = 1; key <= 4; ++key)
 		REQUIRE_FALSE(cache.lookup_update(key, load_page));
 	REQUIRE(cache.lookup_update(1, load_page));
@@ -130,7 +130,7 @@ TEST_CASE("LIRS: Pruned history does not cause promotion", "[lirs]") {
 
 TEST_CASE("LIRS: A demoted page needs two accesses to become LIR again",
 					"[lirs]") {
-	cache_t<int> cache(3);
+	caches::lirs::cache_t<int> cache(3);
 	for (int key = 1; key <= 3; ++key)
 		REQUIRE_FALSE(cache.lookup_update(key, load_page));
 	REQUIRE(cache.lookup_update(3, load_page));				// Demote 1, remove from S.
@@ -143,7 +143,7 @@ TEST_CASE("LIRS: A demoted page needs two accesses to become LIR again",
 }
 
 TEST_CASE("LIRS: HIR hits outside S refresh Q eviction order", "[lirs]") {
-	cache_t<int> cache(200); // 198 LIR slots and 2 HIR slots.
+	caches::lirs::cache_t<int> cache(200); // 198 LIR slots and 2 HIR slots.
 	for (int key = 1; key <= 200; ++key)
 		REQUIRE_FALSE(cache.lookup_update(key, load_page));
 	for (int key = 1; key <= 198; ++key)
@@ -155,7 +155,7 @@ TEST_CASE("LIRS: HIR hits outside S refresh Q eviction order", "[lirs]") {
 }
 
 TEST_CASE("LIRS: Demotion adds a page to the recent end of Q", "[lirs]") {
-	cache_t<int> cache(200);
+	caches::lirs::cache_t<int> cache(200);
 	for (int key = 1; key <= 200; ++key)
 		REQUIRE_FALSE(cache.lookup_update(key, load_page));
 	REQUIRE(cache.lookup_update(199, load_page));				// Q: [1, 200].
@@ -165,7 +165,7 @@ TEST_CASE("LIRS: Demotion adds a page to the recent end of Q", "[lirs]") {
 }
 
 TEST_CASE("LIRS: String keys are independent of integer values", "[lirs]") {
-	cache_t<int, std::string> cache(2);
+	caches::lirs::cache_t<int, std::string> cache(2);
 	REQUIRE_FALSE(cache.lookup_update("one", load_string_page));
 	REQUIRE_FALSE(cache.lookup_update("two", load_string_page));
 	REQUIRE_FALSE(cache.lookup_update("three", load_string_page));
@@ -181,7 +181,7 @@ TEST_CASE("LIRS: History retains no pages and data is not duplicated",
 					"[lirs]") {
 	REQUIRE(pages_alive == 0);
 	{
-		cache_t<Page> cache(3);
+		caches::lirs::cache_t<Page> cache(3);
 		for (int key = 1; key <= 100; ++key) {
 			REQUIRE_FALSE(cache.lookup_update(key, load_tracked_page));
 			REQUIRE(pages_alive == (key < 3 ? key : 3));

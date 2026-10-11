@@ -2,9 +2,8 @@ add_library(lirs INTERFACE)
 target_include_directories(lirs INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(lirs INTERFACE cxx_std_20)
 
-add_executable(lirs_cli ${PROJECT_SOURCE_DIR}/main.cpp)
+add_executable(lirs_cli main.cpp)
 target_link_libraries(lirs_cli PRIVATE lirs)
-target_compile_definitions(lirs_cli PRIVATE CACHE_HEADER="lirs.hpp")
 
 if(BUILD_TESTING)
     add_executable(lirs_tests tests/lirs_tests.cpp)

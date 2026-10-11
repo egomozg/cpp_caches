@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <utility>
 
+namespace caches::two_q {
+
 template <typename T, typename KeyT = int>
 class cache_t {
 	std::size_t sz_;
@@ -81,3 +83,5 @@ public:
 		return false;
 	}
 };
+
+} // namespace caches::two_q
